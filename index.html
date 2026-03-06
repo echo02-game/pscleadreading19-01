@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>普通話水平測試朗讀作品19號</title>
+    <style>
+        /* 字體設置：確保各平台圓體效果及拼音字體 */
+        body {
+            font-family: "Yuanti SC", "YouYuan", "Microsoft YaHei", "Rounded Mplus 1c", sans-serif;
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            -webkit-tap-highlight-color: transparent;
+            padding-bottom: 140px; /* 給底部軌道留空間 */
+        }
+
+        .pinyin {
+            font-family: "Calibri", sans-serif;
+            font-size: 1.1em;
+            color: #666;
+            margin-bottom: 4px;
+            line-height: 1.2;
+            font-weight: normal;
+        }
+
+        .hanzi {
+            font-size: 1.4em;
+            font-weight: bold;
+            line-height: 1.5;
+            color: #2c3e50;
+            letter-spacing: 1px;
+        }
+
+        /* 頂部固定標題和版權聲明 */
+        #header-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            z-index: 100;
+            text-align: right;
+            box-sizing: border-box;
+        }
+
+        #page-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        #disclaimer {
+            font-size: 0.75em;
+            color: #999;
+            line-height: 1.4;
+            max-width: 100%;
+            word-wrap: break-word;
+        }
+
+        /* 主內容區域 */
+        #main-content {
+            padding: 140px 20px 60px 20px; 
+            max-width: 800px;
+            margin: 0 auto;
+            display: none; /* 登入前隱藏 */
+        }
+
+        /* 登入頁面 */
+        #login-page {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f5f7fa;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        #login-page h1 {
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+
+        .login-input {
+            width: 100%;
+            max-width: 300px;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+
+        .login-input:focus {
+            border-color: #4CAF50;
+        }
+
+        #btn-login {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1em;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.1s, background-color 0.3s;
+            width: 100%;
+            max-width: 300px;
+            font-family: inherit;
+        }
+
+        #btn-login:active {
+            transform: scale(0.98);
+        }
+
+        #login-error {
+            color: #e74c3c;
+            margin-top: 10px;
+            height: 20px;
+            font-size: 0.9em;
+        }
+
+        /* 句子區塊樣式 */
+        .sentence-block {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            transition: background-color 0.3s;
+        }
+
+        .sentence-block.active {
+            background-color: #e8f5e9;
+            border-left: 4px solid #4CAF50;
+        }
+
+        .controls {
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn-play {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 1.2em;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            padding-left: 4px; /* 修正播放圖標視覺居中 */
+        }
+        
+        .btn-play.playing {
+            background-color: #f39c12;
+            padding-left: 0; /* 暫停圖標居中 */
+        }
+
+        /* 底部獎勵軌道 */
+        #reward-track-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 0 25px 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 90;
+            overflow-x: auto; /* 手機端橫向滾動 */
+            white-space: nowrap;
+            display: none; /* 登入前隱藏 */
+            -webkit-overflow-scrolling: touch;
+        }
+
+        #reward-track {
+            display: inline-flex;
+            align-items: center;
+            padding: 0 20px;
+            min-width: 100%;
+            justify-content: center;
+        }
+
+        .node {
+            font-size: 1.8em;
+            color: #ccc;
+            margin: 0 5px;
+            transition: all 0.5s ease;
+            text-shadow: 0 0 5px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .node.lit {
+            color: #ffca28;
+            text-shadow: 0 0 15px #ffca28, 0 0 20px #ffb300;
+            transform: scale(1.2);
+        }
+
+        .line {
+            height: 4px;
+            width: 25px;
+            background-color: #eee;
+            margin: 0 2px;
+            border-radius: 2px;
+            transition: background-color 0.5s ease;
+        }
+
+        .line.lit {
+            background-color: #ffca28;
+            box-shadow: 0 0 5px #ffca28;
+        }
+
+        .trophy {
+            font-size: 2.2em;
+            margin-left: 10px;
+        }
+
+        /* 結束按鈕及回首頁 */
+        .finish-container {
+            text-align: center;
+            margin-top: 40px;
+            padding-bottom: 20px;
+        }
+
+        #btn-finish {
+            background-color: #9e9e9e; /* 默認灰色 */
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border-radius: 30px;
+            cursor: not-allowed;
+            font-family: inherit;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+            opacity: 0.7;
+        }
+
+        #btn-finish.ready {
+            background-color: #e74c3c;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+            opacity: 1;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .back-home {
+            display: inline-flex;
+            align-items: center;
+            color: #3498db;
+            text-decoration: none;
+            font-size: 1.1em;
+            font-weight: bold;
+            padding: 10px;
+        }
+
+        .back-home span { margin-right: 8px; font-size: 1.3em; }
+
+        /* 彈窗樣式 */
+        #modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+            backdrop-filter: blur(3px);
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px 20px;
+            border-radius: 15px;
+            text-align: center;
+            width: 80%;
+            max-width: 350px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            animation: popIn 0.3s ease-out;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-content h2 { color: #e74c3c; margin-top: 0; }
+        .modal-content p { color: #555; line-height: 1.5; margin-bottom: 25px; }
+        
+        #btn-close-modal {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 20px;
+            font-size: 1em;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        /* 隱藏的開發者按鈕及面板 */
+        #dev-trigger {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            font-size: 1.5em;
+            cursor: pointer;
+            opacity: 0.1; /* 不起眼 */
+            z-index: 1000;
+            display: none; /* 僅 Windows 顯示 */
+        }
+
+        #dev-panel {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            color: lime;
+            z-index: 999;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: monospace;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        #dev-panel button {
+            background: #333; color: lime; border: 1px solid lime;
+            padding: 10px 20px; margin: 10px; cursor: pointer; font-size: 1.2em;
+        }
+
+        #dev-panel button.recording { background: red; color: white; border-color: red; }
+        #dev-text { font-size: 1.5em; text-align: center; margin: 20px 0; color: white; max-width: 800px; }
+        #dev-info { font-size: 1.2em; margin-bottom: 20px; color: #aaa; }
+
+        /* Dev 模式下強制顯示音頻播放器並置頂 */
+        .audio-player-dev {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1001; /* 確保在黑色面板上方 */
+            width: 80%;
+            max-width: 500px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 頂部標題與聲明 -->
+    <div id="header-container">
+        <div id="page-title">普通話水平測試朗讀作品19號</div>
+        <div id="disclaimer">本網頁拼音均由AI生成，標準注音請參考《普通話水平測試實施綱要（2021年版）》。錄音僅供參考。網頁僅供VTC内部使用。職業訓練局普通話培訓測試中心版權所有。</div>
+    </div>
+
+    <!-- 登入頁面 -->
+    <div id="login-page">
+        <h1>開始練習</h1>
+        <input type="text" id="input-name" class="login-input" placeholder="請輸入您的名字" autocomplete="off">
+        <input type="password" id="input-password" class="login-input" placeholder="請輸入密碼" autocomplete="off">
+        <button id="btn-login" onclick="login()">進入</button>
+        <div id="login-error"></div>
+    </div>
+
+    <!-- 主內容 -->
+    <div id="main-content">
+        <div id="sentences-container"></div>
+        
+        <div class="finish-container">
+            <button id="btn-finish" onclick="finishPractice()">我已完成跟讀練習啦！</button>
+            <br>
+            <a href="https://echo02-game.github.io/pscleadreading-hub/" class="back-home">
+                <span>📖</span>回主目錄
+            </a>
+        </div>
+    </div>
+
+    <!-- 底部獎勵軌道 -->
+    <div id="reward-track-container">
+        <div id="reward-track"></div>
+    </div>
+
+    <!-- 成功彈窗 -->
+    <div id="modal-overlay">
+        <div class="modal-content">
+            <h2>太棒啦！</h2>
+            <p>打卡信息已複製，<br>快去分享努力後的喜悅吧！</p>
+            <button id="btn-close-modal" onclick="closeModal()">關閉</button>
+        </div>
+    </div>
+
+    <!-- 全局音頻播放器 -->
+    <audio id="global-audio" src="pscleadreading19.mp3" preload="metadata"></audio>
+
+    <!-- 開發者按鈕及面板 -->
+    <div id="dev-trigger" onclick="openDevMode()">🛠️</div>
+    <div id="dev-panel">
+        <div style="position: absolute; top: 20px; right: 20px; cursor: pointer; color: white;" onclick="closeDevMode()">✖ 關閉</div>
+        <h2>時間軸標記模式</h2>
+        <div id="dev-info">當前句子：<span id="dev-index">0</span> / 總時間：<span id="dev-time">0.00</span>s</div>
+        <div id="dev-text">點擊下方按鈕開始</div>
+        <div>
+            <button id="btn-record-start" onclick="startDevRecording()">▶ 開始錄製模式</button>
+            <button id="btn-record-next" onclick="markDevNext()" disabled>⏭ 標記下一句 (Space)</button>
+        </div>
+        <button onclick="exportJson()" style="margin-top: 30px;">📋 複製生成的 JSON</button>
+    </div>
+
+    <script>
+        // 音頻時間數據 (可由開發者模式替換)
+        var sentenceData = [
+    {
+        "text": "作品19號",
+        "pinyin": "zuò pǐn 1 9 hào",
+        "start": 0,
+        "duration": 4.49
+    },
+    {
+        "text": "人們常常把人與自然對立起來，宣稱要征服自然。",
+        "pinyin": "rén men cháng cháng bǎ rén yǔ zì rán duì lì qǐ lái，xuān chēng yào zhēng fú zì rán。",
+        "start": 4.49,
+        "duration": 9.19
+    },
+    {
+        "text": "殊不知在大自然面前，人類永遠衹是一個天真幼稚的孩童，衹是大自然機體上普通的一部分，正像一株小草衹是她的普通一部分一樣。",
+        "pinyin": "shū bù zhī zài dà zì rán miàn qián，rén lèi yǒng yuǎn zhǐ shì yī gè tiān zhēn yòu zhì de hái tóng，zhǐ shì dà zì rán jī tǐ shàng pǔ tōng de yī bù fen，zhèng xiàng yī zhū xiǎo cǎo zhǐ shì tā de pǔ tōng yī bù fen yī yàng。",
+        "start": 13.68,
+        "duration": 21.95
+    },
+    {
+        "text": "如果說自然的智慧是大海，那麼，人類的智慧就衹是大海中的一個小水滴，雖然這個水滴也能映照大海，但畢竟不是大海，可是，人們竟然不自量力地宣稱要用這滴水來代替大海。",
+        "pinyin": "rú guǒ shuō zì rán de zhì huì shì dà hǎi，nà me，rén lèi de zhì huì jiù zhǐ shì dà hǎi zhōng de yī gè xiǎo shuǐ dī，suī rán zhè gè shuǐ dī yě néng yìng zhào dà hǎi，dàn bì jìng bú shì dà hǎi，kě shì，rén men jìng rán bù zì liàng lì de xuān chēng yào yòng zhè dī shuǐ lái dài tì dà hǎi。",
+        "start": 35.62,
+        "duration": 31.61
+    },
+    {
+        "text": "看着人類這種狂妄的表現，大自然一定會竊笑——就像母親面對無知的孩子那樣的笑。",
+        "pinyin": "kàn zhe rén lèi zhè zhǒng kuáng wàng de biǎo xiàn，dà zì rán yī dìng huì qiè xiào —— jiù xiàng mǔ qīn miàn duì wú zhī de hái zi nà yàng de xiào。",
+        "start": 67.24,
+        "duration": 14.07
+    },
+    {
+        "text": "人類的作品飛上了太空，打開了一個個微觀世界，於是人類沾沾自喜，以為揭開了大自然的秘密。",
+        "pinyin": "rén lèi de zuò pǐn fēi shàng le tài kōng，dǎ kāi le yī gè gè wēi guān shì jiè，yú shì rén lèi zhān zhān zì xǐ，yǐ wéi jiē kāi le dà zì rán de mì mì。",
+        "start": 81.3,
+        "duration": 17.26
+    },
+    {
+        "text": "可是，在自然看來，人類上下翻飛的這片巨大空間，不過是咫尺之間而已，就如同鯤鵬看待斥鷃一般，衹是蓬蒿之間罷了。",
+        "pinyin": "kě shì，zài zì rán kàn lái，rén lèi shàng xià fān fēi de zhè piàn jù dà kōng jiān，bú guò shì zhǐ chǐ zhī jiān ér yǐ，jiù rú tóng kūn péng kàn dài chì yàn yī bān，zhǐ shì péng hāo zhī jiān bà le。",
+        "start": 98.57,
+        "duration": 20.9
+    },
+    {
+        "text": "即使從人類自身智慧發展史的角度看，人類也沒有理由過分自傲：人類的知識與其祖先相比誠然有了極大的進步，似乎有嘲笑古人的資本；",
+        "pinyin": "jí shǐ cóng rén lèi zì shēn zhì huì fā zhǎn shǐ de jiǎo dù kàn，rén lèi yě méi yǒu lǐ yóu guò fèn zì ào：rén lèi de zhī shi yǔ qí zǔ xiān xiāng bǐ chéng rán yǒu le jí dà de jìn bù，sì hu yǒu cháo xiào gǔ rén de zī běn；",
+        "start": 119.47,
+        "duration": 23.76
+    },
+    {
+        "text": "可是，殊不知對於後人而言我們也是古人，一萬年以後的人們也同樣會嘲笑今天的我們，也許在他們看來，我們的科學觀念還幼稚得很，我們的航天器在他們眼中不過是個非常簡單的//兒童玩具。",
+        "pinyin": "kě shì，shū bù zhī duì yú hòu rén ér yán wǒ men yě shì gǔ rén，yī wàn nián yǐ hòu de rén men yě tóng yàng huì cháo xiào jīn tiān de wǒ men，yě xǔ zài tā men kàn lái，wǒ men de kē xué guān niàn hái yòu zhì de hěn，wǒ men de háng tiān qì zài tā men yǎn zhōng bú guò shì gè fēi cháng jiǎn dān de // ér tóng wán jù。",
+        "start": 143.23,
+        "duration": 31.21
+    }
+];
+
+        // 系統變量
+        var userName = "";
+        var currentPlayIndex = -1;
+        var audioPlayer = document.getElementById('global-audio');
+        var checkInterval = null;
+        var completedSentences = new Set();
+        var totalSentences = sentenceData.length;
+
+        // 初始化
+        window.onload = function() {
+            // 動態調整 main-content 的 padding-top 以防 header 遮擋
+            var headerHeight = document.getElementById('header-container').offsetHeight;
+            document.getElementById('main-content').style.paddingTop = (headerHeight + 20) + "px";
+
+            // 判斷是否為 Windows 顯示開發者按鈕
+            if (navigator.userAgent.indexOf("Windows") !== -1) {
+                document.getElementById('dev-trigger').style.display = 'block';
+            }
+
+            // Enter 鍵登入
+            document.getElementById('input-password').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') login();
+            });
+            document.getElementById('input-name').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') document.getElementById('input-password').focus();
+            });
+        };
+
+        // 登入邏輯
+        function login() {
+            var name = document.getElementById('input-name').value.trim();
+            var pwd = document.getElementById('input-password').value;
+            var errorDiv = document.getElementById('login-error');
+
+            if (!name) {
+                errorDiv.textContent = "請輸入名字";
+                return;
+            }
+            if (pwd !== "vtcpsc") {
+                errorDiv.textContent = "請輸入正確密碼";
+                return;
+            }
+
+            userName = name;
+            document.getElementById('login-page').style.display = 'none';
+            document.getElementById('main-content').style.display = 'block';
+            document.getElementById('reward-track-container').style.display = 'block';
+            
+            buildContent();
+            buildRewardTrack();
+        }
+
+        // 構建主內容
+        function buildContent() {
+            var container = document.getElementById('sentences-container');
+            container.innerHTML = "";
+
+            sentenceData.forEach((item, index) => {
+                var block = document.createElement('div');
+                block.className = 'sentence-block';
+                block.id = 'block-' + index;
+
+                var pinyinDiv = document.createElement('div');
+                pinyinDiv.className = 'pinyin';
+                pinyinDiv.textContent = item.pinyin;
+
+                var textDiv = document.createElement('div');
+                textDiv.className = 'hanzi';
+                textDiv.textContent = item.text;
+
+                var controlsDiv = document.createElement('div');
+                controlsDiv.className = 'controls';
+
+                var playBtn = document.createElement('button');
+                playBtn.className = 'btn-play';
+                playBtn.id = 'btn-play-' + index;
+                playBtn.innerHTML = '▶';
+                playBtn.onclick = function() { togglePlay(index); };
+
+                controlsDiv.appendChild(playBtn);
+                block.appendChild(pinyinDiv);
+                block.appendChild(textDiv);
+                block.appendChild(controlsDiv);
+                container.appendChild(block);
+            });
+        }
+
+        // 構建獎勵軌道
+        function buildRewardTrack() {
+            var track = document.getElementById('reward-track');
+            track.innerHTML = "";
+            for (let i = 0; i < totalSentences; i++) {
+                var star = document.createElement('span');
+                star.className = 'node star';
+                star.id = 'star-' + i;
+                star.innerHTML = '★'; // 空心可用 ☆，這裡用顏色區分
+                track.appendChild(star);
+
+                if (i < totalSentences - 1) {
+                    var line = document.createElement('div');
+                    line.className = 'line';
+                    line.id = 'line-' + i;
+                    track.appendChild(line);
+                }
+            }
+            
+            var lineTrophy = document.createElement('div');
+            lineTrophy.className = 'line';
+            lineTrophy.id = 'line-trophy';
+            track.appendChild(lineTrophy);
+
+            var trophy = document.createElement('span');
+            trophy.className = 'node trophy';
+            trophy.id = 'trophy';
+            trophy.innerHTML = '🏆';
+            track.appendChild(trophy);
+        }
+
+        // 播放控制邏輯
+        function togglePlay(index) {
+            var data = sentenceData[index];
+            var btn = document.getElementById('btn-play-' + index);
+
+            // 如果點擊的是另一個句子，先暫停當前的
+            if (currentPlayIndex !== -1 && currentPlayIndex !== index) {
+                resetPlayState(currentPlayIndex);
+            }
+
+            if (currentPlayIndex === index && !audioPlayer.paused) {
+                // 暫停
+                audioPlayer.pause();
+                btn.innerHTML = '▶';
+                btn.classList.remove('playing');
+                btn.style.paddingLeft = '4px';
+                clearInterval(checkInterval);
+            } else {
+                // 播放或繼續
+                if (currentPlayIndex !== index || audioPlayer.currentTime >= (data.start + data.duration)) {
+                    // 全新開始該句
+                    audioPlayer.currentTime = data.start;
+                }
+                
+                audioPlayer.play();
+                btn.innerHTML = '⏸';
+                btn.classList.add('playing');
+                btn.style.paddingLeft = '0';
+                currentPlayIndex = index;
+
+                // 視覺高亮
+                document.querySelectorAll('.sentence-block').forEach(b => b.classList.remove('active'));
+                document.getElementById('block-' + index).classList.add('active');
+
+                // 監控時間
+                clearInterval(checkInterval);
+                checkInterval = setInterval(() => checkAudioEnd(index), 100);
+            }
+        }
+
+        function checkAudioEnd(index) {
+            var data = sentenceData[index];
+            if (audioPlayer.currentTime >= data.start + data.duration || audioPlayer.ended) {
+                audioPlayer.pause();
+                resetPlayState(index);
+                markSentenceComplete(index);
+            }
+        }
+
+        function resetPlayState(index) {
+            var btn = document.getElementById('btn-play-' + index);
+            if (btn) {
+                btn.innerHTML = '▶';
+                btn.classList.remove('playing');
+                btn.style.paddingLeft = '4px';
+            }
+            clearInterval(checkInterval);
+        }
+
+        function markSentenceComplete(index) {
+            if (!completedSentences.has(index)) {
+                completedSentences.add(index);
+                
+                // 點亮星星
+                var star = document.getElementById('star-' + index);
+                star.classList.add('lit');
+                
+                // 點亮前方的線
+                if (index > 0) {
+                    document.getElementById('line-' + (index - 1)).classList.add('lit');
+                }
+
+                // 檢查是否全部完成
+                if (completedSentences.size === totalSentences) {
+                    document.getElementById('line-trophy').classList.add('lit');
+                    document.getElementById('trophy').classList.add('lit');
+                    
+                    var finishBtn = document.getElementById('btn-finish');
+                    finishBtn.classList.add('ready');
+                    finishBtn.disabled = false;
+                }
+            }
+        }
+
+        // 打卡完成按鈕
+        function finishPractice() {
+            var finishBtn = document.getElementById('btn-finish');
+            if (!finishBtn.classList.contains('ready')) return;
+
+            var today = new Date();
+            var month = today.getMonth() + 1;
+            var date = today.getDate();
+            var msg = `${userName}已於${month}月${date}日完成作品19號跟讀練習！`;
+
+            // 複製到剪貼板
+            navigator.clipboard.writeText(msg).then(() => {
+                document.getElementById('modal-overlay').style.display = 'flex';
+            }).catch(err => {
+                console.error("複製失敗", err);
+                document.getElementById('modal-overlay').style.display = 'flex';
+            });
+        }
+
+        function closeModal() {
+            document.getElementById('modal-overlay').style.display = 'none';
+        }
+
+        /* ================= 開發者標記模式 ================= */
+        var devRecording = false;
+        var playingIndex = 0;
+        var devStartTime = 0;
+        var recordedData = [];
+
+        function openDevMode() {
+            document.getElementById('dev-panel').style.display = 'flex';
+            // 強制顯示原生播放器以供調試
+            audioPlayer.controls = true;
+            audioPlayer.classList.add('audio-player-dev');
+        }
+
+        function closeDevMode() {
+            document.getElementById('dev-panel').style.display = 'none';
+            audioPlayer.controls = false;
+            audioPlayer.classList.remove('audio-player-dev');
+            if(devRecording) finishDevRecording();
+        }
+
+        function startDevRecording() {
+            devRecording = true;
+            playingIndex = 0;
+            recordedData = JSON.parse(JSON.stringify(sentenceData)); // 拷貝骨架
+            
+            document.getElementById('btn-record-start').classList.add('recording');
+            document.getElementById('btn-record-start').textContent = "⏹ 錄製中...";
+            document.getElementById('btn-record-next').disabled = false;
+            
+            audioPlayer.currentTime = 0;
+            audioPlayer.play();
+            devStartTime = 0;
+
+            updateDevInfo();
+            document.addEventListener('keydown', devKeyHandler);
+        }
+
+        function devKeyHandler(e) {
+            if (e.code === 'Space' && devRecording) {
+                e.preventDefault();
+                markDevNext();
+            }
+        }
+
+        function markDevNext() {
+            if (!devRecording || playingIndex >= sentenceData.length) return;
+
+            const now = audioPlayer.currentTime;
+            const duration = now - devStartTime;
+            
+            recordedData[playingIndex].start = parseFloat(devStartTime.toFixed(2));
+            recordedData[playingIndex].duration = parseFloat(duration.toFixed(2));
+            
+            playingIndex++;
+            devStartTime = now;
+            
+            if (playingIndex >= sentenceData.length) {
+                finishDevRecording();
+            } else {
+                updateDevInfo();
+            }
+        }
+
+        function finishDevRecording() {
+            devRecording = false;
+            audioPlayer.pause();
+            document.getElementById('btn-record-start').classList.remove('recording');
+            document.getElementById('btn-record-start').textContent = "▶ 重新錄製";
+            document.getElementById('btn-record-next').disabled = true;
+            document.getElementById('dev-text').textContent = "錄製完成！請點擊複製 JSON";
+            document.removeEventListener('keydown', devKeyHandler);
+            alert("錄製完成！請點擊「複製 JSON」並替換源代碼中的變量。");
+        }
+
+        function updateDevInfo() {
+            if (playingIndex < sentenceData.length) {
+                document.getElementById('dev-index').textContent = playingIndex + 1;
+                document.getElementById('dev-text').textContent = sentenceData[playingIndex].text;
+            }
+        }
+
+        function exportJson() {
+            const jsonStr = JSON.stringify(recordedData, null, 4);
+            navigator.clipboard.writeText("var sentenceData = " + jsonStr + ";").then(() => {
+                alert("JSON 已複製！請去代碼中替換 var sentenceData = ... 部分");
+            });
+        }
+
+        setInterval(() => {
+            if (document.getElementById('dev-panel').style.display !== 'none') {
+                document.getElementById('dev-time').textContent = audioPlayer.currentTime.toFixed(2);
+            }
+        }, 100);
+
+    </script>
+</body>
+</html>
